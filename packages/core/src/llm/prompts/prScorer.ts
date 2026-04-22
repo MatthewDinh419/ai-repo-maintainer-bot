@@ -6,7 +6,7 @@ import { UNTRUSTED_INPUT_NOTICE, wrapUntrusted } from "./shared.js";
 export interface PrScorerPromptInput {
   title: string;
   body: string;
-  changedFiles: Array<{ filename: string; additions: number; deletions: number }>;
+  changedFiles: Array<{ filename: string; additions: number; deletions: number; patch?: string }>;
 }
 
 /** System prompt: only description and scope; other dimensions are local rules. */
@@ -62,7 +62,11 @@ export interface PrScorerResult {
  */
 export function buildPrScorerUserMessage(input: PrScorerPromptInput): string {
   const files = input.changedFiles
-    .map((f) => `- ${f.filename} (+${f.additions}/-${f.deletions})`)
+    .map((f) => {
+      const header = `- ${f.filename} (+${f.additions}/-${f.deletions})`;
+      if (!f.patch) return header;
+      return `${header}\n\`\`\`diff\n${f.patch}\n\`\`\``;
+    })
     .join("\n");
   return `Pull request:
 ${wrapUntrusted(

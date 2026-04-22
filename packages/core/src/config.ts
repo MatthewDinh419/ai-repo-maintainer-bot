@@ -46,6 +46,7 @@ export const ConfigSchema = z.object({
       require_tests_for_paths: z.array(z.string()).default(["src/**"]),
       sensitive_paths: z.array(z.string()).default([]),
       large_pr_threshold: z.number().int().min(1).default(500),
+      diff_lines_per_file: z.number().int().min(0).default(20),
     })
     .default({}),
   // global: dry run and default model id

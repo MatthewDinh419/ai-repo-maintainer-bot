@@ -52,13 +52,13 @@ export function buildDuplicateUserMessage(input: DuplicatePromptInput): string {
     body: c.body,
   }));
   return `New issue:
-${wrapUntrusted(
-  "new_issue",
-  `Title: ${input.newIssue.title}\nBody: ${input.newIssue.body}`,
-)}
+  ${wrapUntrusted(
+    "new_issue",
+    `Title: ${input.newIssue.title}\nBody: ${input.newIssue.body}`,
+  )}
 
-Existing open issues (most recent first, JSON):
-${wrapUntrusted("existing_issues", JSON.stringify(candidates, null, 2))}
+  Existing open issues (most recent first, JSON):
+  ${wrapUntrusted("existing_issues", JSON.stringify(candidates, null, 2))}
 
-Call report_duplicate_check with your decision.`;
+  Call report_duplicate_check with your decision.`;
 }

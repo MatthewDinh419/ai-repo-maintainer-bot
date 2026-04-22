@@ -65,6 +65,7 @@ export async function runPrScoring(deps: {
   const size = evaluateSize(pr, cfg.large_pr_threshold);
 
   // LLM: description + scope only (other columns come from rules above)
+  const diffLines = cfg.diff_lines_per_file;
   const llmResult = await deps.llm.callStructured<PrScorerResult>({
     system: PR_SCORER_SYSTEM,
     user: buildPrScorerUserMessage({
@@ -74,6 +75,7 @@ export async function runPrScoring(deps: {
         filename: f.filename,
         additions: f.additions,
         deletions: f.deletions,
+        patch: diffLines > 0 ? truncatePatch(f.patch, diffLines) : undefined,
       })),
     }),
     toolName: PR_SCORER_TOOL_NAME,
@@ -191,6 +193,16 @@ ${row("Sensitive paths", r.sensitivePaths)}
 ${row("Size", r.size)}
 
 <sub>Posted by ai-repo-maintainer-bot · not a verdict, just a signal</sub>`;
+}
+
+/**
+ * Truncates a patch to the first `maxLines` lines, appending a note if cut.
+ */
+function truncatePatch(patch: string | undefined, maxLines: number): string | undefined {
+  if (!patch) return undefined;
+  const lines = patch.split("\n");
+  if (lines.length <= maxLines) return patch;
+  return lines.slice(0, maxLines).join("\n") + `\n... (${lines.length - maxLines} more lines)`;
 }
 
 /**

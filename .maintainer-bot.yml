@@ -25,6 +25,7 @@ pr_scoring: # scores the pull request based on the description, scope, tests, se
     - "packages/action/src/**"
     - "packages/core/src/llm/**"
   large_pr_threshold: 500 # maximum number of lines of code allowed in the pull request
+  diff_lines_per_file: 20 # lines of diff shown to LLM per file (0 = filenames only)
 
 general: # general settings for the maintainer bot
   dry_run: false # if true, the maintainer bot will not post or label anything. Useful for testing.
