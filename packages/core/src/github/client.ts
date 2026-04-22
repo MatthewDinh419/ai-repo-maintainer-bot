@@ -1,10 +1,12 @@
 import { Octokit } from "@octokit/rest";
 
+/** Identifies a GitHub repository (owner + name, no host). */
 export interface RepoRef {
   owner: string;
   repo: string;
 }
 
+/** Normalized issue used by analyzers and prompts. */
 export interface IssueSummary {
   number: number;
   title: string;
@@ -13,6 +15,7 @@ export interface IssueSummary {
   labels: string[];
 }
 
+/** One file in a pull request diff listing. */
 export interface PullFileChange {
   filename: string;
   status: string;
@@ -21,6 +24,7 @@ export interface PullFileChange {
   patch: string | undefined;
 }
 
+/** Metadata for a pull request (no file list; use `listPullFiles`). */
 export interface PullSummary {
   number: number;
   title: string;
@@ -33,6 +37,10 @@ export interface PullSummary {
   fromFork: boolean;
 }
 
+/**
+ * Thin Octokit wrapper: issues, PRs, labels, and idempotent label creation
+ * (422 = already exists).
+ */
 export class GitHubClient {
   private readonly octokit: Octokit;
 
@@ -40,6 +48,10 @@ export class GitHubClient {
     this.octokit = new Octokit({ auth: token });
   }
 
+  /**
+   * Lists open, non-PR issues created at or after `since`, newest first, up to
+   * `limit` items, excluding `excludeNumber` if set.
+   */
   async listRecentOpenIssues(
     ref: RepoRef,
     opts: { since: Date; limit: number; excludeNumber?: number },
@@ -68,6 +80,9 @@ export class GitHubClient {
       }));
   }
 
+  /**
+   * Fetches a single issue (not a PR) by number.
+   */
   async getIssue(ref: RepoRef, number: number): Promise<IssueSummary> {
     const { data } = await this.octokit.issues.get({
       owner: ref.owner,
@@ -85,6 +100,9 @@ export class GitHubClient {
     };
   }
 
+  /**
+   * Fetches pull request metadata and whether the head branch is from a fork.
+   */
   async getPull(ref: RepoRef, number: number): Promise<PullSummary> {
     const { data } = await this.octokit.pulls.get({
       owner: ref.owner,
@@ -105,6 +123,9 @@ export class GitHubClient {
     };
   }
 
+  /**
+   * Paginates all files in a PR (additions, deletions, optional patch).
+   */
   async listPullFiles(ref: RepoRef, number: number): Promise<PullFileChange[]> {
     const files = await this.octokit.paginate(this.octokit.pulls.listFiles, {
       owner: ref.owner,
@@ -121,6 +142,9 @@ export class GitHubClient {
     }));
   }
 
+  /**
+   * All label names in the repository.
+   */
   async listRepoLabels(ref: RepoRef): Promise<string[]> {
     const labels = await this.octokit.paginate(this.octokit.issues.listLabelsForRepo, {
       owner: ref.owner,
@@ -130,6 +154,9 @@ export class GitHubClient {
     return labels.map((l) => l.name);
   }
 
+  /**
+   * True if any issue comment body contains the given marker (dedupe bot posts).
+   */
   async hasExistingBotComment(
     ref: RepoRef,
     number: number,
@@ -142,6 +169,9 @@ export class GitHubClient {
     return comments.some((c) => (c.body ?? "").includes(marker));
   }
 
+  /**
+   * Appends a new comment on an issue or PR.
+   */
   async createIssueComment(ref: RepoRef, number: number, body: string): Promise<void> {
     await this.octokit.issues.createComment({
       owner: ref.owner,
@@ -151,6 +181,9 @@ export class GitHubClient {
     });
   }
 
+  /**
+   * Adds labels; no-ops if `labels` is empty.
+   */
   async addLabels(ref: RepoRef, number: number, labels: string[]): Promise<void> {
     if (labels.length === 0) return;
     await this.octokit.issues.addLabels({
@@ -161,6 +194,9 @@ export class GitHubClient {
     });
   }
 
+  /**
+   * Creates a label if it does not exist; ignores GitHub 422 (name taken).
+   */
   async createLabelIfMissing(
     ref: RepoRef,
     name: string,
@@ -183,6 +219,7 @@ export class GitHubClient {
   }
 }
 
+/** Truncates long issue bodies for candidate lists. */
 function truncate(s: string, n: number): string {
   if (s.length <= n) return s;
   return s.slice(0, n) + "…";

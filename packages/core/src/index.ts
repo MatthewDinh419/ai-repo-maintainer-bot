@@ -1,3 +1,6 @@
+/**
+ * Public entry: config, GitHub/LLM clients, and analyzer runners.
+ */
 export * from "./config.js";
 export { GitHubClient } from "./github/client.js";
 export type {

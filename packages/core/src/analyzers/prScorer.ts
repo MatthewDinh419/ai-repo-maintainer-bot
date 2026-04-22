@@ -10,13 +10,16 @@ import {
   type PrScorerResult,
 } from "../llm/prompts/prScorer.js";
 
+/** Per-check severity for the PR quality table. */
 export type CheckStatus = "ok" | "warn" | "flag";
 
+/** One row in the report: status plus a short human-readable note. */
 export interface DimensionResult {
   status: CheckStatus;
   note: string;
 }
 
+/** All dimensions shown in the posted markdown table. */
 export interface PrScoreReport {
   description: DimensionResult;
   scope: DimensionResult;
@@ -25,12 +28,24 @@ export interface PrScoreReport {
   size: DimensionResult;
 }
 
+/** Result of PR scoring, including the rendered table body when not skipped. */
 export interface PrScoreAnalysis {
   skipped?: "disabled";
   report?: PrScoreReport;
   comment?: string;
 }
 
+/**
+ * Fetches the PR and files, runs deterministic checks (tests, paths, size) and
+ * an LLM pass for description/scope, then merges rules with LLM output and
+ * returns a markdown comment.
+ *
+ * @param deps.config - App configuration (`pr_scoring` section)
+ * @param deps.gh - GitHub client
+ * @param deps.llm - Structured LLM client
+ * @param deps.ref - Target repository
+ * @param deps.pullNumber - PR to score
+ */
 export async function runPrScoring(deps: {
   config: Config;
   gh: GitHubClient;
@@ -44,10 +59,12 @@ export async function runPrScoring(deps: {
   const pr = await deps.gh.getPull(deps.ref, deps.pullNumber);
   const files = await deps.gh.listPullFiles(deps.ref, deps.pullNumber);
 
+  // Deterministic checks: test presence, sensitive paths, diff size
   const tests = evaluateTests(files, cfg.require_tests_for_paths);
   const sensitivePaths = evaluateSensitivePaths(files, cfg.sensitive_paths);
   const size = evaluateSize(pr, cfg.large_pr_threshold);
 
+  // LLM: description + scope only (other columns come from rules above)
   const llmResult = await deps.llm.callStructured<PrScorerResult>({
     system: PR_SCORER_SYSTEM,
     user: buildPrScorerUserMessage({
@@ -65,6 +82,7 @@ export async function runPrScoring(deps: {
     parse: (raw) => raw as PrScorerResult,
   });
 
+  // Minimum description length can override a lenient LLM "ok"
   const descriptionFromRules = evaluateDescriptionMinLength(
     pr.body,
     cfg.require_description_min_chars,
@@ -72,6 +90,7 @@ export async function runPrScoring(deps: {
   const description =
     descriptionFromRules.status === "flag" ? descriptionFromRules : llmResult.description;
 
+  // Assemble the full report and the GitHub comment body
   const report: PrScoreReport = {
     description,
     scope: llmResult.scope,
@@ -83,6 +102,9 @@ export async function runPrScoring(deps: {
   return { report, comment: renderComment(report) };
 }
 
+/**
+ * Flags when the PR body is shorter than the configured minimum (trimmed).
+ */
 function evaluateDescriptionMinLength(body: string, min: number): DimensionResult {
   if (body.trim().length < min) {
     return {
@@ -93,6 +115,10 @@ function evaluateDescriptionMinLength(body: string, min: number): DimensionResul
   return { status: "ok", note: "" };
 }
 
+/**
+ * If watched paths change, require at least one file that looks like a test;
+ * otherwise warn (not flag).
+ */
 function evaluateTests(
   files: PullFileChange[],
   requirePaths: string[],
@@ -117,6 +143,9 @@ function evaluateTests(
   };
 }
 
+/**
+ * Flags any change touching a configured sensitive path glob.
+ */
 function evaluateSensitivePaths(
   files: PullFileChange[],
   sensitive: string[],
@@ -130,6 +159,9 @@ function evaluateSensitivePaths(
   };
 }
 
+/**
+ * Warns when total additions+deletions exceed the large-PR threshold.
+ */
 function evaluateSize(pr: PullSummary, threshold: number): DimensionResult {
   const total = pr.additions + pr.deletions;
   if (total > threshold) {
@@ -141,6 +173,7 @@ function evaluateSize(pr: PullSummary, threshold: number): DimensionResult {
   return { status: "ok", note: `${total} lines` };
 }
 
+/** Renders the markdown table posted as a PR comment. */
 function renderComment(r: PrScoreReport): string {
   const row = (name: string, d: DimensionResult): string => {
     const tag = d.status.toUpperCase();
@@ -162,6 +195,10 @@ function renderComment(r: PrScoreReport): string {
   ].join("\n");
 }
 
+/**
+ * Glob-like match for path patterns: `*` = segment, `**/` = nested dirs.
+ * Used for `require_tests_for_paths` and `sensitive_paths` config.
+ */
 export function globLike(pattern: string, path: string): boolean {
   let regexStr = "^";
   let i = 0;

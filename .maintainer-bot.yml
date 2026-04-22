@@ -1,10 +1,10 @@
-duplicate_detection:
+duplicate_detection: # checks for duplicate issues or pull requests
   enabled: true
   threshold: 0.80 # confidence threshold for duplicate detection
   search_window: 90d # search window for open issues to consider
   max_candidates: 50 # maximum number of open issues to consider
 
-labeling:
+labeling: # classifies the issue or pull request into a label
   enabled: true
   labels: # labels are sent to the LLM to classify the issue or pull request
     bug: "reports something broken or behaving unexpectedly"
@@ -15,17 +15,17 @@ labeling:
     good-first-issue: "well-scoped, approachable for new contributors"
   auto_create_missing: false # automatically create missing labels
 
-pr_scoring:
+pr_scoring: # scores the pull request based on the description, scope, tests, sensitive paths, and size
   enabled: true
-  require_description_min_chars: 50
-  require_tests_for_paths:
+  require_description_min_chars: 50 # minimum number of characters required in the description
+  require_tests_for_paths: # paths to require tests for
     - "packages/core/src/**"
     - "packages/action/src/**"
-  sensitive_paths:
+  sensitive_paths: # paths to consider sensitive like secrets or llm prompts
     - "packages/action/src/**"
     - "packages/core/src/llm/**"
-  large_pr_threshold: 500
+  large_pr_threshold: 500 # maximum number of lines of code allowed in the pull request
 
-general:
-  dry_run: false
-  model: claude-sonnet-4-6
+general: # general settings for the maintainer bot
+  dry_run: false # if true, the maintainer bot will not post or label anything. Useful for testing.
+  model: claude-sonnet-4-6 # model to use for the LLM

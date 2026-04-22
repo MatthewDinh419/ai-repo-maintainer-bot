@@ -1,3 +1,6 @@
+/**
+ * Re-exports issue/PR analyzers (duplicates, labels, PR scoring).
+ */
 export { runDuplicateDetection } from "./duplicateDetector.js";
 export { runLabelClassification } from "./labelClassifier.js";
 export { runPrScoring, globLike } from "./prScorer.js";

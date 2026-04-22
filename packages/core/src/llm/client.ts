@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 
+/** Arguments for a single tool-only structured LLM call. */
 export interface StructuredCallOptions<T> {
   system: string;
   user: string;
@@ -10,6 +11,10 @@ export interface StructuredCallOptions<T> {
   parse: (raw: unknown) => T;
 }
 
+/**
+ * Anthropic Messages API: forces a single tool use and parses its `input`
+ * payload.
+ */
 export class LLMClient {
   private readonly client: Anthropic;
   private readonly model: string;
@@ -19,11 +24,16 @@ export class LLMClient {
     this.model = model;
   }
 
+  /**
+   * Sends one user turn, requires `tool_use` for `opts.toolName`, and returns
+   * the parsed tool input.
+   */
   async callStructured<T>(opts: StructuredCallOptions<T>): Promise<T> {
     const response = await this.client.messages.create({
       model: this.model,
       max_tokens: opts.maxTokens ?? 1024,
       system: [
+        // Prompt caching: use ephemeral cache on the system text block
         // cache_control is supported at runtime but not always reflected in the
         // SDK's TypeScript types depending on version — cast through unknown.
         {

@@ -2,12 +2,17 @@ import { readFileSync, existsSync } from "node:fs";
 import yaml from "js-yaml";
 import { z } from "zod";
 
+/**
+ * Zod schema for the maintainer config file (YAML). Each subsection maps to a
+ * feature (duplicates, labeling, PR scoring, general).
+ */
 const DurationSchema = z
   .string()
   .regex(/^\d+[dhm]$/)
   .default("90d");
 
 export const ConfigSchema = z.object({
+  // duplicate detection: LLM + recent issues window
   duplicate_detection: z
     .object({
       enabled: z.boolean().default(true),
@@ -16,6 +21,7 @@ export const ConfigSchema = z.object({
       max_candidates: z.number().int().min(1).max(200).default(50),
     })
     .default({}),
+  // issue/PR auto-labeling from configured name -> description map
   labeling: z
     .object({
       enabled: z.boolean().default(true),
@@ -32,6 +38,7 @@ export const ConfigSchema = z.object({
       auto_create_missing: z.boolean().default(false),
     })
     .default({}),
+  // PR table comment: description, scope, tests, paths, size
   pr_scoring: z
     .object({
       enabled: z.boolean().default(true),
@@ -41,6 +48,7 @@ export const ConfigSchema = z.object({
       large_pr_threshold: z.number().int().min(1).default(500),
     })
     .default({}),
+  // global: dry run and default model id
   general: z
     .object({
       dry_run: z.boolean().default(false),
@@ -51,16 +59,26 @@ export const ConfigSchema = z.object({
 
 export type Config = z.infer<typeof ConfigSchema>;
 
+/**
+ * Parses YAML (or an empty object) and returns a fully validated `Config` with
+ * defaults applied.
+ */
 export function parseConfig(source: string | undefined): Config {
   const raw = source ? (yaml.load(source) as unknown) : {};
   return ConfigSchema.parse(raw ?? {});
 }
 
+/**
+ * Reads config from a path, or default config if the file is missing.
+ */
 export function loadConfigFromFile(path: string): Config {
   if (!existsSync(path)) return ConfigSchema.parse({});
   return parseConfig(readFileSync(path, "utf8"));
 }
 
+/**
+ * Converts a config duration string (`Nd`, `Nh`, or `Nm`) to milliseconds.
+ */
 export function parseDuration(d: string): number {
   const match = /^(\d+)([dhm])$/.exec(d);
   if (!match) throw new Error(`invalid duration: ${d}`);

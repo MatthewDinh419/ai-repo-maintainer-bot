@@ -10,12 +10,21 @@ import {
   type LabelerResult,
 } from "../llm/prompts/labeler.js";
 
+/** Outcome: suggested labels, restricted to those defined in config. */
 export interface LabelAnalysis {
   skipped?: "disabled";
   labels: Array<{ name: string; justification: string }>;
   appliedLabels: string[];
 }
 
+/**
+ * Asks the model which configured labels apply to the item; drops any name
+ * not present in `config.labeling.labels`.
+ *
+ * @param deps.kind - Whether the content is an issue or pull request
+ * @param deps.title - Issue or PR title
+ * @param deps.body - Issue or PR body
+ */
 export async function runLabelClassification(deps: {
   config: Config;
   gh: GitHubClient;
@@ -29,6 +38,7 @@ export async function runLabelClassification(deps: {
   const cfg = deps.config.labeling;
   if (!cfg.enabled) return { skipped: "disabled", labels: [], appliedLabels: [] };
 
+  // LLM returns label names; we only keep those allowed by the config map
   const result = await deps.llm.callStructured<LabelerResult>({
     system: LABELER_SYSTEM,
     user: buildLabelerUserMessage({
@@ -43,6 +53,7 @@ export async function runLabelClassification(deps: {
     parse: (raw) => raw as LabelerResult,
   });
 
+  // Strip unknown label names and expose flat applied list
   const allowed = new Set(Object.keys(cfg.labels));
   const matches = result.labels.filter((l) => allowed.has(l.name));
 
