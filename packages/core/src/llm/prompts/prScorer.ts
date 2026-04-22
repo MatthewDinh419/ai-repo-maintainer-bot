@@ -64,16 +64,14 @@ export function buildPrScorerUserMessage(input: PrScorerPromptInput): string {
   const files = input.changedFiles
     .map((f) => `- ${f.filename} (+${f.additions}/-${f.deletions})`)
     .join("\n");
-  return [
-    "Pull request:",
-    wrapUntrusted(
-      "pr",
-      `Title: ${input.title}\n\nDescription:\n${input.body || "(empty)"}`,
-    ),
-    "",
-    `Changed files (${input.changedFiles.length}):`,
-    wrapUntrusted("files", files || "(none)"),
-    "",
-    "Call report_pr_quality with your assessment.",
-  ].join("\n");
+  return `Pull request:
+${wrapUntrusted(
+  "pr",
+  `Title: ${input.title}\n\nDescription:\n${input.body || "(empty)"}`,
+)}
+
+Changed files (${input.changedFiles.length}):
+${wrapUntrusted("files", files || "(none)")}
+
+Call report_pr_quality with your assessment.`;
 }

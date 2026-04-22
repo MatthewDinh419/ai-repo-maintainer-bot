@@ -180,19 +180,17 @@ function renderComment(r: PrScoreReport): string {
     const result = d.note ? `${tag} — ${d.note}` : tag;
     return `| ${name.padEnd(15)} | ${result} |`;
   };
-  return [
-    "## PR quality check",
-    "",
-    "| Check           | Result |",
-    "|-----------------|--------|",
-    row("Description", r.description),
-    row("Scope", r.scope),
-    row("Tests", r.tests),
-    row("Sensitive paths", r.sensitivePaths),
-    row("Size", r.size),
-    "",
-    "<sub>Posted by ai-repo-maintainer-bot · not a verdict, just a signal</sub>",
-  ].join("\n");
+  return `## PR quality check
+
+| Check           | Result |
+|-----------------|--------|
+${row("Description", r.description)}
+${row("Scope", r.scope)}
+${row("Tests", r.tests)}
+${row("Sensitive paths", r.sensitivePaths)}
+${row("Size", r.size)}
+
+<sub>Posted by ai-repo-maintainer-bot · not a verdict, just a signal</sub>`;
 }
 
 /**

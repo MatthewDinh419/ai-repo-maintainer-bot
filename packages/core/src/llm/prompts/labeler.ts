@@ -54,12 +54,12 @@ export function buildLabelerUserMessage(input: LabelerPromptInput): string {
   const defs = Object.entries(input.labelDefinitions)
     .map(([name, desc]) => `- ${name}: ${desc}`)
     .join("\n");
-  return [
-    `Available labels (name: description):\n${defs}`,
-    "",
-    `${input.kind === "issue" ? "Issue" : "Pull request"} content:`,
-    wrapUntrusted("content", `Title: ${input.title}\n\n${input.body}`),
-    "",
-    "Call apply_labels with the labels that apply. Only use label names from the list above.",
-  ].join("\n");
+  const kindLabel = input.kind === "issue" ? "Issue" : "Pull request";
+  return `Available labels (name: description):
+${defs}
+
+${kindLabel} content:
+${wrapUntrusted("content", `Title: ${input.title}\n\n${input.body}`)}
+
+Call apply_labels with the labels that apply. Only use label names from the list above.`;
 }
