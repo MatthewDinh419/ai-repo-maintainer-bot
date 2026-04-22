@@ -1,0 +1,22 @@
+{
+  "name": "ai-repo-maintainer-bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GitHub Action that uses Claude to triage issues and PRs",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "bundle": "pnpm --filter @ai-repo-maintainer/action bundle",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}

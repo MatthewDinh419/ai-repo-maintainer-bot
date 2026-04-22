@@ -1,0 +1,33 @@
+duplicate_detection:
+  enabled: true
+  threshold: 0.80
+  search_window: 90d
+  max_candidates: 50
+
+labeling:
+  enabled: true
+  labels:
+    bug: "reports something broken or behaving unexpectedly"
+    feature: "requests new functionality"
+    docs: "relates to documentation or examples"
+    performance: "relates to speed, memory, or resource usage"
+    security: "potential security vulnerability"
+    good-first-issue: "well-scoped, approachable for new contributors"
+  require_confirmation: false
+  auto_create_missing: false
+
+pr_scoring:
+  enabled: true
+  require_description_min_chars: 50
+  require_tests_for_paths:
+    - "packages/core/src/**"
+    - "packages/action/src/**"
+  sensitive_paths:
+    - "packages/action/src/**"
+    - "packages/core/src/llm/**"
+  large_pr_threshold: 500
+
+general:
+  dry_run: false
+  bot_comment_footer: true
+  model: claude-sonnet-4-6

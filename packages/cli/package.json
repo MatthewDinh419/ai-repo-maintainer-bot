@@ -1,0 +1,17 @@
+{
+  "name": "@ai-repo-maintainer/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "maintainer-bot": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node --loader ts-node/esm src/index.ts"
+  },
+  "dependencies": {
+    "@ai-repo-maintainer/core": "workspace:*"
+  }
+}

@@ -1,0 +1,24 @@
+name: "AI Repo Maintainer Bot"
+description: "Uses Claude to triage issues and PRs — duplicate detection, labeling, and PR quality scoring."
+author: "ai-repo-maintainer-bot"
+branding:
+  icon: "git-pull-request"
+  color: "purple"
+inputs:
+  anthropic-api-key:
+    description: "Anthropic API key for Claude."
+    required: true
+  github-token:
+    description: "Token used for GitHub API calls. Defaults to the workflow's GITHUB_TOKEN."
+    required: false
+    default: ${{ github.token }}
+  config-path:
+    description: "Path to the .maintainer-bot.yml config file."
+    required: false
+    default: ".maintainer-bot.yml"
+  model:
+    description: "Override Claude model. Defaults to the value in config."
+    required: false
+runs:
+  using: "node20"
+  main: "dist/index.js"

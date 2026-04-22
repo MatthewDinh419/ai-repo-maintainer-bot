@@ -1,0 +1,14 @@
+node_modules/
+**/dist/
+!packages/action/dist/
+**/build/
+*.tsbuildinfo
+.env
+.env.local
+coverage/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+pnpm-lock.yaml
+
