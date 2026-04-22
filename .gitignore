@@ -10,5 +10,4 @@ coverage/
 Thumbs.db
 .vscode/
 .idea/
-pnpm-lock.yaml
 
