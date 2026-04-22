@@ -17,7 +17,9 @@ jobs:
       pull-requests: write
       contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./packages/action
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run maintainer bot
+        uses: ./packages/action
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
