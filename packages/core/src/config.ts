@@ -29,7 +29,6 @@ export const ConfigSchema = z.object({
         "good-first-issue": "well-scoped, approachable for new contributors",
         "needs-info": "missing information required to triage",
       }),
-      require_confirmation: z.boolean().default(false),
       auto_create_missing: z.boolean().default(false),
     })
     .default({}),
@@ -45,7 +44,6 @@ export const ConfigSchema = z.object({
   general: z
     .object({
       dry_run: z.boolean().default(false),
-      bot_comment_footer: z.boolean().default(true),
       model: z.string().default("claude-sonnet-4-6"),
     })
     .default({}),

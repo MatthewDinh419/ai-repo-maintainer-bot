@@ -1,20 +1,19 @@
 duplicate_detection:
   enabled: true
-  threshold: 0.80
-  search_window: 90d
-  max_candidates: 50
+  threshold: 0.80 # confidence threshold for duplicate detection
+  search_window: 90d # search window for open issues to consider
+  max_candidates: 50 # maximum number of open issues to consider
 
 labeling:
   enabled: true
-  labels:
+  labels: # labels are sent to the LLM to classify the issue or pull request
     bug: "reports something broken or behaving unexpectedly"
     feature: "requests new functionality"
     docs: "relates to documentation or examples"
     performance: "relates to speed, memory, or resource usage"
     security: "potential security vulnerability"
     good-first-issue: "well-scoped, approachable for new contributors"
-  require_confirmation: false
-  auto_create_missing: false
+  auto_create_missing: false # automatically create missing labels
 
 pr_scoring:
   enabled: true
@@ -29,5 +28,4 @@ pr_scoring:
 
 general:
   dry_run: false
-  bot_comment_footer: true
   model: claude-sonnet-4-6

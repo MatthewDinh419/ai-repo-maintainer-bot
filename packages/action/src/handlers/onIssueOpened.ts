@@ -61,7 +61,7 @@ export async function onIssueOpened(deps: OnIssueOpenedDeps): Promise<void> {
 
   if (labels.appliedLabels.length > 0) {
     core.info(`labels: ${labels.appliedLabels.join(", ")}`);
-    if (!dry && !config.labeling.require_confirmation) {
+    if (!dry) {
       const repoLabels = new Set(await gh.listRepoLabels(ref));
       const existing = labels.appliedLabels.filter((l) => repoLabels.has(l));
       const missing = labels.appliedLabels.filter((l) => !repoLabels.has(l));
