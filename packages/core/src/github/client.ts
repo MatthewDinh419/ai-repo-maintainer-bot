@@ -130,6 +130,18 @@ export class GitHubClient {
     return labels.map((l) => l.name);
   }
 
+  async hasExistingBotComment(
+    ref: RepoRef,
+    number: number,
+    marker: string,
+  ): Promise<boolean> {
+    const comments = await this.octokit.paginate(
+      this.octokit.issues.listComments,
+      { owner: ref.owner, repo: ref.repo, issue_number: number, per_page: 100 },
+    );
+    return comments.some((c) => (c.body ?? "").includes(marker));
+  }
+
   async createIssueComment(ref: RepoRef, number: number, body: string): Promise<void> {
     await this.octokit.issues.createComment({
       owner: ref.owner,

@@ -20,6 +20,13 @@ export async function onIssueOpened(deps: OnIssueOpenedDeps): Promise<void> {
   const { config, gh, ref, issueNumber } = deps;
   const dry = config.general.dry_run;
 
+  const BOT_MARKER = "Posted by ai-repo-maintainer-bot";
+  const alreadyCommented = await gh.hasExistingBotComment(ref, issueNumber, BOT_MARKER);
+  if (alreadyCommented) {
+    core.info(`bot already commented on #${issueNumber}, skipping to avoid duplicate posts`);
+    return;
+  }
+
   const dup = await runDuplicateDetection(deps);
   if (dup.flagged && dup.comment) {
     core.info(`duplicate flagged for #${issueNumber}: ${dup.result?.matching_issue_number}`);
