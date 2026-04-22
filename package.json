@@ -5,7 +5,7 @@
   "description": "GitHub Action that uses Claude to triage issues and PRs",
   "packageManager": "pnpm@9.0.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "build": "pnpm -r build",

@@ -30,14 +30,16 @@ export async function onPullRequest(deps: OnPullRequestDeps): Promise<void> {
 
   const BOT_MARKER = "Posted by ai-repo-maintainer-bot";
   const alreadyCommented = await gh.hasExistingBotComment(ref, pullNumber, BOT_MARKER);
+  if (alreadyCommented) {
+    core.info(`bot already commented on #${pullNumber}, skipping to avoid duplicate posts`);
+    return;
+  }
 
   const score = await runPrScoring(deps);
   if (score.comment) {
     core.info(`posting PR score comment on #${pullNumber}`);
-    if (!dry && !alreadyCommented) {
+    if (!dry) {
       await gh.createIssueComment(ref, pullNumber, score.comment);
-    } else if (alreadyCommented) {
-      core.info(`bot already commented on #${pullNumber}, skipping score comment`);
     }
   } else if (score.skipped) {
     core.info(`pr scoring skipped: ${score.skipped}`);
