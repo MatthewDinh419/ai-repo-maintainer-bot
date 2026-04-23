@@ -155,6 +155,23 @@ export class GitHubClient {
   }
 
   /**
+   * Returns the ID of the first comment whose body contains the marker, or
+   * null if none exists. Used to decide whether to create or update.
+   */
+  async findBotComment(
+    ref: RepoRef,
+    number: number,
+    marker: string,
+  ): Promise<number | null> {
+    const comments = await this.octokit.paginate(
+      this.octokit.issues.listComments,
+      { owner: ref.owner, repo: ref.repo, issue_number: number, per_page: 100 },
+    );
+    const match = comments.find((c) => (c.body ?? "").includes(marker));
+    return match?.id ?? null;
+  }
+
+  /**
    * True if any issue comment body contains the given marker (dedupe bot posts).
    */
   async hasExistingBotComment(
@@ -162,11 +179,8 @@ export class GitHubClient {
     number: number,
     marker: string,
   ): Promise<boolean> {
-    const comments = await this.octokit.paginate(
-      this.octokit.issues.listComments,
-      { owner: ref.owner, repo: ref.repo, issue_number: number, per_page: 100 },
-    );
-    return comments.some((c) => (c.body ?? "").includes(marker));
+    const id = await this.findBotComment(ref, number, marker);
+    return id !== null;
   }
 
   /**
@@ -177,6 +191,18 @@ export class GitHubClient {
       owner: ref.owner,
       repo: ref.repo,
       issue_number: number,
+      body,
+    });
+  }
+
+  /**
+   * Edits an existing comment by ID.
+   */
+  async updateIssueComment(ref: RepoRef, commentId: number, body: string): Promise<void> {
+    await this.octokit.issues.updateComment({
+      owner: ref.owner,
+      repo: ref.repo,
+      comment_id: commentId,
       body,
     });
   }
