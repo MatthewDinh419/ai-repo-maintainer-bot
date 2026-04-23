@@ -56,7 +56,7 @@ export async function onPullRequest(deps: OnPullRequestDeps): Promise<void> {
       title: pr.title,
       body: pr.body,
     });
-    if (labels.appliedLabels.length > 0 && !dry && !config.labeling.require_confirmation) {
+    if (labels.appliedLabels.length > 0 && !dry) {
       const repoLabels = new Set(await gh.listRepoLabels(ref));
       const existing = labels.appliedLabels.filter((l) => repoLabels.has(l));
       if (existing.length > 0) {

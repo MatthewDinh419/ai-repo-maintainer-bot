@@ -71,12 +71,15 @@ export async function runPrScoring(deps: {
     user: buildPrScorerUserMessage({
       title: pr.title,
       body: pr.body,
-      changedFiles: files.map((f) => ({
-        filename: f.filename,
-        additions: f.additions,
-        deletions: f.deletions,
-        patch: diffLines > 0 ? truncatePatch(f.patch, diffLines) : undefined,
-      })),
+      changedFiles: files.map((f) => {
+        const patch = diffLines > 0 ? truncatePatch(f.patch, diffLines) : undefined;
+        return {
+          filename: f.filename,
+          additions: f.additions,
+          deletions: f.deletions,
+          ...(patch !== undefined ? { patch } : {}),
+        };
+      }),
     }),
     toolName: PR_SCORER_TOOL_NAME,
     toolDescription: PR_SCORER_TOOL_DESCRIPTION,
