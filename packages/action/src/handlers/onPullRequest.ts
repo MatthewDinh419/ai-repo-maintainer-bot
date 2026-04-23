@@ -14,7 +14,7 @@ export interface OnPullRequestDeps {
   llm: LLMClient;
   ref: RepoRef;
   pullNumber: number;
-  action: "opened" | "synchronize" | "ready_for_review";
+  action: "opened" | "synchronize" | "ready_for_review" | "edited";
 }
 
 export async function onPullRequest(deps: OnPullRequestDeps): Promise<void> {
@@ -57,7 +57,7 @@ export async function onPullRequest(deps: OnPullRequestDeps): Promise<void> {
   }
 
   // --- Labeling (only on open/ready, not on every push) ---
-  if (action === "opened" || action === "ready_for_review") {
+  if (action === "opened" || action === "ready_for_review" || action === "edited") {
     core.info("running label classification...");
     const labels = await runLabelClassification({
       config,

@@ -7,12 +7,16 @@ duplicate_detection: # checks for duplicate issues or pull requests
 labeling: # classifies the issue or pull request into a label
   enabled: true
   labels: # labels are sent to the LLM to classify the issue or pull request
-    bug: "reports something broken or behaving unexpectedly"
-    feature: "requests new functionality"
-    docs: "relates to documentation or examples"
-    performance: "relates to speed, memory, or resource usage"
-    security: "potential security vulnerability"
-    good-first-issue: "well-scoped, approachable for new contributors"
+    bug: "Something isn't working"
+    documentation: "Improvements or additions to documentation"
+    duplicate: "This issue or pull request already exists"
+    enhancement: "New feature or request"
+    "good first issue": "Good for newcomers"
+    "help wanted": "Extra attention is needed"
+    invalid: "This doesn't seem right"
+    possible-duplicate: "May be a duplicate of an existing issue or pull request"
+    question: "Further information is requested"
+    wontfix: "This will not be worked on"
   auto_create_missing: false # automatically create missing labels
 
 pr_scoring: # scores the pull request based on the description, scope, tests, sensitive paths, and size

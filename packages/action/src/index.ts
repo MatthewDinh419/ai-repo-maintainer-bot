@@ -41,7 +41,7 @@ async function main(): Promise<void> {
     ctx.eventName === "pull_request_target"
   ) {
     const action = ctx.payload.action;
-    if (!["opened", "synchronize", "ready_for_review"].includes(action ?? "")) {
+    if (!["opened", "synchronize", "ready_for_review", "edited"].includes(action ?? "")) {
       core.info(`ignoring pull_request action: ${action}`);
       return;
     }
@@ -55,7 +55,7 @@ async function main(): Promise<void> {
       llm,
       ref,
       pullNumber,
-      action: action as "opened" | "synchronize" | "ready_for_review",
+      action: action as "opened" | "synchronize" | "ready_for_review" | "edited",
     });
     return;
   }
