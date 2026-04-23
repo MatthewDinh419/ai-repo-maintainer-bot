@@ -12,10 +12,15 @@
     "bundle": "pnpm --filter @ai-repo-maintainer/action bundle",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "prepare": "simple-git-hooks"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "if git diff --cached --name-only | grep -qE '^packages/(action|core)/src/'; then echo 'Action/core source changed — re-bundling...' && pnpm --filter @ai-repo-maintainer/core build && pnpm --filter @ai-repo-maintainer/action bundle && git add packages/action/dist; fi"
   },
   "devDependencies": {
     "@types/node": "^20.12.0",
+    "simple-git-hooks": "^2.11.0",
     "typescript": "^5.4.0",
     "vitest": "^1.6.0"
   }
