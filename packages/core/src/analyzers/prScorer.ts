@@ -206,8 +206,8 @@ function truncatePatch(patch: string | undefined, maxLines: number): string | un
 }
 
 /**
- * Glob-like match for path patterns: `*` = segment, `**/` = nested dirs.
- * Used for `require_tests_for_paths` and `sensitive_paths` config.
+ * Glob-like match for path patterns: "*" = single segment, "**" = nested dirs.
+ * Used for require_tests_for_paths and sensitive_paths config.
  */
 export function globLike(pattern: string, path: string): boolean {
   let regexStr = "^";
