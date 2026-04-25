@@ -1,6 +1,9 @@
-# ai-repo-maintainer-bot
+<img width="778" height="609" alt="image" src="https://github.com/user-attachments/assets/e6ad9162-a41c-4d27-b655-30b785060959" /># ai-repo-maintainer-bot
 
 A GitHub Action that uses Claude to perform first-pass triage on every new issue and PR — surfacing duplicates, applying labels, and scoring PR quality. **It never closes or rejects anything.** It comments and labels so humans can decide faster.
+
+<img width="778" height="609" alt="image" src="https://github.com/user-attachments/assets/e3c56a9e-92d8-4691-aa2f-1ac499784add" />
+
 
 ## Install
 
