@@ -69,7 +69,7 @@ packages/
 ## Local testing
 
 ```bash
-export GITHUB_TOKEN=...
+export GITHUB_TOKEN=... # this is probably needed if repo is private
 export ANTHROPIC_API_KEY=...
 pnpm install
 pnpm build
