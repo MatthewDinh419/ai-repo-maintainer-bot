@@ -37,6 +37,6 @@ general: # general settings for the maintainer bot
 
 rate_limiting: # prevents abuse/spam by limiting how many issues/PRs a user can create
   enabled: true # if true, rate limiting is active
-  max_issues_per_hour: 10 # max issues per user within the window
-  max_prs_per_hour: 10 # max PRs per user within the window
+  max_issues_per_hour: 2 # max issues per user within the window
+  max_prs_per_hour: 2 # max PRs per user within the window
   window_hours: 24 # time window for counting (1-168 hours)
