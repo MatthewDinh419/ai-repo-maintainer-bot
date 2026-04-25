@@ -2,8 +2,6 @@
 
 A GitHub Action that uses Claude to perform first-pass triage on every new issue and PR — surfacing duplicates, applying labels, and scoring PR quality. **It never closes or rejects anything.** It comments and labels so humans can decide faster.
 
-Status: **v0.1 scaffold** — see [DESIGN.md](DESIGN.md) for the full design doc.
-
 ## Install
 
 Add `.github/workflows/maintainer-bot.yml` to your repo:
