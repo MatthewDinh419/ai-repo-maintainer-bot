@@ -2,8 +2,13 @@
 
 A GitHub Action that uses Claude to perform first-pass triage on every new issue and PR — surfacing duplicates, applying labels, and scoring PR quality. **It never closes or rejects anything.** It comments and labels so humans can decide faster.
 
-<img width="778" height="609" alt="image" src="https://github.com/user-attachments/assets/e3c56a9e-92d8-4691-aa2f-1ac499784add" />
-<img width="753" height="510" alt="image" src="https://github.com/user-attachments/assets/9ba7adc9-bab9-43d8-9d3a-eb99fff750bf" />
+## Feature Showcase
+
+### Pull Request Analysis
+<img width="778" height="400" alt="image" src="https://github.com/user-attachments/assets/e3c56a9e-92d8-4691-aa2f-1ac499784add" />
+
+### Issue Analysis
+<img width="753" height="400" alt="image" src="https://github.com/user-attachments/assets/9ba7adc9-bab9-43d8-9d3a-eb99fff750bf" />
 
 
 ## Install
