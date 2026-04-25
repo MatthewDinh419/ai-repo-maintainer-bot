@@ -14,7 +14,11 @@ on:
   issues:
     types: [opened]
   pull_request:
-    types: [opened, synchronize, ready_for_review]
+    types: [opened, synchronize, ready_for_review, edited]
+  issue_comment:
+    types: [created, edited]
+  pull_request_review_comment:
+    types: [created, edited]
 
 concurrency:
   group: maintainer-bot-${{ github.event.issue.number || github.event.pull_request.number }}
@@ -28,6 +32,7 @@ jobs:
       pull-requests: write
       contents: read
     steps:
+      - uses: actions/checkout@v4
       - uses: ai-repo-maintainer-bot/action@v1
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
