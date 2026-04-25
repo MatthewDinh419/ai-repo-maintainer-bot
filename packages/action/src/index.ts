@@ -31,8 +31,9 @@ async function main(): Promise<void> {
 
   if (ctx.eventName === "issues" && ctx.payload.action === "opened") {
     const issueNumber = ctx.payload.issue?.number;
+    const author = ctx.payload.issue?.user?.login;
     if (!issueNumber) throw new Error("issues.opened payload missing issue.number");
-    await onIssueOpened({ config, gh, llm, ref, issueNumber });
+    await onIssueOpened({ config, gh, llm, ref, issueNumber, author });
     return;
   }
 

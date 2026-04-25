@@ -56,6 +56,15 @@ export const ConfigSchema = z.object({
       model: z.string().default("claude-sonnet-4-6"),
     })
     .default({}),
+  // rate limiting: protect against spam/burst abuse
+  rate_limiting: z
+    .object({
+      enabled: z.boolean().default(true),
+      max_issues_per_hour: z.number().int().min(1).default(10),
+      max_prs_per_hour: z.number().int().min(1).default(10),
+      window_hours: z.number().int().min(1).max(168).default(24),
+    })
+    .default({}),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;

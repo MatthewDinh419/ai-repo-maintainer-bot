@@ -34,3 +34,9 @@ pr_scoring: # scores the pull request based on the description, scope, tests, se
 general: # general settings for the maintainer bot
   dry_run: false # if true, the maintainer bot will not post or label anything. Useful for testing.
   model: claude-sonnet-4-6 # model to use for the LLM
+
+rate_limiting: # prevents abuse/spam by limiting how many issues/PRs a user can create
+  enabled: true # if true, rate limiting is active
+  max_issues_per_hour: 10 # max issues per user within the window
+  max_prs_per_hour: 10 # max PRs per user within the window
+  window_hours: 24 # time window for counting (1-168 hours)

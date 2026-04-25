@@ -24,6 +24,33 @@ export async function onPullRequest(deps: OnPullRequestDeps): Promise<void> {
   core.info(`handling PR #${pullNumber} action=${action}`);
 
   const pr = await gh.getPull(ref, pullNumber);
+
+  // --- Rate limiting (only check on open to avoid counting updates as new PRs) ---
+  if (config.rate_limiting.enabled && (action === "opened" || action === "edited")) {
+    const rateCheck = await gh.checkRateLimit(
+      ref,
+      pr.author,
+      config.rate_limiting.max_prs_per_hour * config.rate_limiting.window_hours,
+      config.rate_limiting.window_hours,
+      true, // isPullRequest = true
+    );
+    if (!rateCheck.allowed) {
+      core.info(`rate limit exceeded for user ${pr.author}: ${rateCheck.count} PRs in ${config.rate_limiting.window_hours}h`);
+      if (!dry) {
+        const existingCommentId = await gh.findBotComment(ref, pullNumber, "Posted by ai-repo-maintainer-bot");
+        const body = `👋 Hi @${pr.author}! You've created ${rateCheck.count} PRs in the last ${config.rate_limiting.window_hours} hours. ` +
+          `To prevent spam, I'll skip AI analysis for now. A human maintainer will review this soon. ` +
+          `Thanks for your understanding!`;
+        if (existingCommentId !== null) {
+          await gh.updateIssueComment(ref, existingCommentId, body);
+        } else {
+          await gh.createIssueComment(ref, pullNumber, body);
+        }
+      }
+      return;
+    }
+    core.info(`rate limit check passed: ${rateCheck.count}/${config.rate_limiting.max_prs_per_hour * config.rate_limiting.window_hours} PRs`);
+  }
   core.info(`PR title: "${pr.title}" | ${pr.additions}+/${pr.deletions}- lines | draft=${pr.draft}`);
 
   if (pr.draft && action !== "ready_for_review") {

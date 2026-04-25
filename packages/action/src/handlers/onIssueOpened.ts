@@ -14,11 +14,37 @@ export interface OnIssueOpenedDeps {
   llm: LLMClient;
   ref: RepoRef;
   issueNumber: number;
+  author?: string;
 }
 
 export async function onIssueOpened(deps: OnIssueOpenedDeps): Promise<void> {
-  const { config, gh, ref, issueNumber } = deps;
+  const { config, gh, ref, issueNumber, author } = deps;
   const dry = config.general.dry_run;
+
+  // --- Rate limiting ---
+  if (config.rate_limiting.enabled && author) {
+    const rateCheck = await gh.checkRateLimit(
+      ref,
+      author,
+      config.rate_limiting.max_issues_per_hour * config.rate_limiting.window_hours,
+      config.rate_limiting.window_hours,
+      false, // isPullRequest = false
+    );
+    if (!rateCheck.allowed) {
+      core.info(`rate limit exceeded for user ${author}: ${rateCheck.count} issues in ${config.rate_limiting.window_hours}h`);
+      if (!dry) {
+        await gh.createIssueComment(
+          ref,
+          issueNumber,
+          `👋 Hi @${author}! You've created ${rateCheck.count} issues in the last ${config.rate_limiting.window_hours} hours. ` +
+            `To prevent spam, I'll skip AI analysis for now. A human maintainer will review this soon. ` +
+            `Thanks for your understanding!`,
+        );
+      }
+      return;
+    }
+    core.info(`rate limit check passed: ${rateCheck.count}/${config.rate_limiting.max_issues_per_hour * config.rate_limiting.window_hours} issues`);
+  }
 
   const BOT_MARKER = "Posted by ai-repo-maintainer-bot";
   const alreadyCommented = await gh.hasExistingBotComment(ref, issueNumber, BOT_MARKER);

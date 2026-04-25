@@ -37,6 +37,13 @@ export interface PullSummary {
   fromFork: boolean;
 }
 
+/** Result of a rate limit check. */
+export interface RateLimitResult {
+  allowed: boolean;
+  count: number;
+  resetAt: Date;
+}
+
 /**
  * Thin Octokit wrapper: issues, PRs, labels, and idempotent label creation
  * (422 = already exists).
@@ -242,6 +249,55 @@ export class GitHubClient {
       if (status === 422) return;
       throw err;
     }
+  }
+
+  /**
+   * Counts issues or PRs created by a specific user since the given time.
+   * Used for rate limiting to detect spam/burst behavior.
+   */
+  async countUserActivity(
+    ref: RepoRef,
+    opts: { creator: string; since: Date; isPullRequest: boolean },
+  ): Promise<number> {
+    const { data } = await this.octokit.issues.listForRepo({
+      owner: ref.owner,
+      repo: ref.repo,
+      state: "all",
+      creator: opts.creator,
+      since: opts.since.toISOString(),
+      per_page: 100,
+    });
+    // Filter to only issues or only PRs based on isPullRequest flag
+    const filtered = data.filter((item) => {
+      const isPR = !!item.pull_request;
+      return isPR === opts.isPullRequest;
+    });
+    return filtered.length;
+  }
+
+  /**
+   * Checks if a user has exceeded the rate limit for issues or PRs.
+   * Returns rate limit status and when the window resets.
+   */
+  async checkRateLimit(
+    ref: RepoRef,
+    creator: string,
+    limit: number,
+    windowHours: number,
+    isPullRequest: boolean,
+  ): Promise<RateLimitResult> {
+    const since = new Date(Date.now() - windowHours * 60 * 60 * 1000);
+    const count = await this.countUserActivity(ref, {
+      creator,
+      since,
+      isPullRequest,
+    });
+    const resetAt = new Date(since.getTime() + windowHours * 60 * 60 * 1000);
+    return {
+      allowed: count < limit,
+      count,
+      resetAt,
+    };
   }
 }
 
